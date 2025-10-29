@@ -1,6 +1,6 @@
 ### Desplegar BD
 
-1. Entrar con el terminal al directorio `/scripts sql`.
+1. Entrar con el terminal al directorio `/SQL`.
 
 1. Tipear:
     ```bash
