@@ -33,144 +33,141 @@ El sistema integra datos reales de **APIs astronómicas (NASA, ESA, Hubble, JPL)
 # Diagrama de Clases del Proyecto
 
 ```mermaid
-classDiagram
-    direction TB
-
-    class Users {
-        +Int UserId (PK)
-        +String Username (UNIQUE)
-        +String Email (UNIQUE)
-        +String PasswordHash
-        +String FirstName
-        +String LastName
-        +Enum Role
-        +Boolean IsActive
-        +DateTime CreatedAt
-        +DateTime LastLogin
+erDiagram
+    Users {
+        INT UserId PK
+        VARCHAR Username
+        VARCHAR Email
+        VARCHAR PasswordHash
+        VARCHAR FirstName
+        VARCHAR LastName
+        ENUM Role
+        TINYINT IsActive
+        DATETIME CreatedAt
+        DATETIME LastLogin
     }
 
-    class CelestialBodies {
-        +Int BodyId (PK)
-        +String Name
-        +Enum Type
-        +String SubType
-        +String Constellation
-        +String RightAscension
-        +String Declination
-        +Decimal Distance
-        +Decimal ApparentMagnitude
-        +Decimal AbsoluteMagnitude
-        +Decimal Mass
-        +Decimal Radius
-        +Int Temperature
-        +Text Description
-        +Date DiscoveryDate
-        +String NASA_ImageURL
-        +Boolean IsVerified
-        +Int CreatedBy (FK)
-        +DateTime CreatedAt
+    CelestialBodies {
+        INT BodyId PK
+        VARCHAR Name
+        ENUM Type
+        VARCHAR SubType
+        VARCHAR Constellation
+        VARCHAR RightAscension
+        VARCHAR Declination
+        DECIMAL Distance
+        DECIMAL ApparentMagnitude
+        DECIMAL AbsoluteMagnitude
+        DECIMAL Mass
+        DECIMAL Radius
+        INT Temperature
+        TEXT Description
+        DATE DiscoveryDate
+        VARCHAR NASA_ImageURL
+        TINYINT IsVerified
+        INT CreatedBy FK
+        DATETIME CreatedAt
     }
 
-    class Discoveries {
-        +Int DiscoveryId (PK)
-        +String Title
-        +Text Description
-        +String Coordinates
-        +DateTime DiscoveryDate
-        +Int ReportedBy (FK)
-        +Int CelestialBodyId (FK)
-        +Enum Status
-        +Json NASA_API_Data
-        +DateTime CreatedAt
-        +DateTime VerifiedAt
-        +Int VerifiedBy (FK)
+    Discoveries {
+        INT DiscoveryId PK
+        VARCHAR Title
+        TEXT Description
+        VARCHAR Coordinates
+        DATETIME DiscoveryDate
+        INT ReportedBy FK
+        INT CelestialBodyId FK
+        ENUM Status
+        JSON NASA_API_Data
+        DATETIME CreatedAt
+        DATETIME VerifiedAt
+        INT VerifiedBy FK
     }
 
-    class Votes {
-        +Int VoteId (PK)
-        +Int DiscoveryId (FK)
-        +Int UserId (FK)
-        +Enum VoteType
-        +DateTime CreatedAt
+    Votes {
+        INT VoteId PK
+        INT DiscoveryId FK
+        INT UserId FK
+        ENUM VoteType
+        DATETIME CreatedAt
     }
 
-    class ExplorationHistory {
-        +Int HistoryId (PK)
-        +Int UserId (FK)
-        +Int CelestialBodyId (FK)
-        +DateTime VisitedAt
-        +Int TimeSpent
+    ExplorationHistory {
+        INT HistoryId PK
+        INT UserId FK
+        INT CelestialBodyId FK
+        DATETIME VisitedAt
+        INT TimeSpent
     }
 
-    class Articles {
-        +Int ArticleId (PK)
-        +String Title
-        +Text Content
-        +String Summary
-        +Int AuthorId (FK)
-        +Enum Category
-        +Boolean IsPublished
-        +DateTime PublishedAt
-        +DateTime CreatedAt
-        +DateTime UpdatedAt
-        +Int ViewCount
+    Articles {
+        INT ArticleId PK
+        VARCHAR Title
+        TEXT Content
+        VARCHAR Summary
+        INT AuthorId FK
+        ENUM Category
+        TINYINT IsPublished
+        DATETIME PublishedAt
+        DATETIME CreatedAt
+        DATETIME UpdatedAt
+        INT ViewCount
     }
 
-    class Events {
-        +Int EventId (PK)
-        +String Title
-        +Text Description
-        +Enum EventType
-        +DateTime StartDate
-        +DateTime EndDate
-        +String Location
-        +String Visibility
-        +Int CreatedBy (FK)
-        +DateTime CreatedAt
-        +Boolean IsActive
+    Events {
+        INT EventId PK
+        VARCHAR Title
+        TEXT Description
+        ENUM EventType
+        DATETIME StartDate
+        DATETIME EndDate
+        VARCHAR Location
+        VARCHAR Visibility
+        INT CreatedBy FK
+        DATETIME CreatedAt
+        TINYINT IsActive
     }
 
-    class Favorites {
-        +Int FavoriteId (PK)
-        +Int UserId (FK)
-        +Int CelestialBodyId (FK)
-        +Int ArticleId (FK)
-        +Int DiscoveryId (FK)
-        +DateTime CreatedAt
+    Favorites {
+        INT FavoriteId PK
+        INT UserId FK
+        INT CelestialBodyId FK
+        INT ArticleId FK
+        INT DiscoveryId FK
+        DATETIME CreatedAt
     }
 
-    class Comments {
-        +Int CommentId (PK)
-        +Text Content
-        +Int UserId (FK)
-        +Int DiscoveryId (FK)
-        +Int ArticleId (FK)
-        +Int ParentCommentId (FK)
-        +DateTime CreatedAt
-        +Boolean IsActive
+    Comments {
+        INT CommentId PK
+        TEXT Content
+        INT UserId FK
+        INT DiscoveryId FK
+        INT ArticleId FK
+        INT ParentCommentId FK
+        DATETIME CreatedAt
+        TINYINT IsActive
     }
 
-    -- Relationships
-    Users "1" -- "0..*" CelestialBodies : Creates (CreatedBy)
-    Users "1" -- "0..*" Discoveries : Reports (ReportedBy)
-    Users "0..1" -- "0..*" Discoveries : Verifies (VerifiedBy)
-    Users "1" -- "0..*" Votes : Casts
-    Users "1" -- "0..*" ExplorationHistory : Has
-    Users "1" -- "0..*" Articles : Authors (AuthorId)
-    Users "1" -- "0..*" Events : Creates (CreatedBy)
-    Users "1" -- "0..*" Favorites : Has
-    Users "1" -- "0..*" Comments : Writes
-
-    CelestialBodies "0..1" -- "0..*" Discoveries : Linked to
-    CelestialBodies "1" -- "0..*" ExplorationHistory : Is Explored
-    CelestialBodies "0..1" -- "0..*" Favorites : Is Favorited
-
-    Discoveries "1" -- "0..*" Votes : Receives
-    Discoveries "0..1" -- "0..*" Favorites : Is Favorited
-    Discoveries "0..1" -- "0..*" Comments : Has
-
-    Articles "0..1" -- "0..*" Favorites : Is Favorited
-    Articles "0..1" -- "0..*" Comments : Has
-
-    Comments "0..1" -- "0..*" Comments : Replies to (Parent)
+    Users ||--o{ CelestialBodies : "CreatedBy"
+    Users ||--o{ Discoveries : "ReportedBy"
+    Users ||--o{ Discoveries : "VerifiedBy"
+    Users ||--o{ ExplorationHistory : "explores"
+    Users ||--o{ Articles : "writes"
+    Users ||--o{ Events : "creates"
+    Users ||--o{ Votes : "casts"
+    Users ||--o{ Favorites : "saves"
+    Users ||--o{ Comments : "writes"
+    
+    CelestialBodies ||--o{ Discoveries : "referenced_in"
+    CelestialBodies ||--o{ ExplorationHistory : "visited_in"
+    CelestialBodies }o--o{ Favorites : "favorited_as"
+    
+    Discoveries ||--o{ Votes : "receives"
+    Discoveries }o--o{ Favorites : "favorited_as"
+    Discoveries ||--o{ Comments : "commented_on"
+    
+    Articles }o--o{ Favorites : "favorited_as"
+    Articles ||--o{ Comments : "commented_on"
+    
+    Comments }o--|| Comments : "replies_to"
 ```
