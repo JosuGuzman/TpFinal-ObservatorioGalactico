@@ -34,140 +34,140 @@ El sistema integra datos reales de **APIs astronómicas (NASA, ESA, Hubble, JPL)
 
 ```mermaid
 erDiagram
-    Users {
-        INT UserId PK
-        VARCHAR Username
+    Usuarios {
+        INT IdUsuario PK
+        VARCHAR NombreUsuario
         VARCHAR Email
-        VARCHAR PasswordHash
-        VARCHAR FirstName
-        VARCHAR LastName
-        ENUM Role
-        TINYINT IsActive
-        DATETIME CreatedAt
-        DATETIME LastLogin
+        VARCHAR HashContraseña
+        VARCHAR Nombre
+        VARCHAR Apellido
+        ENUM Rol
+        TINYINT EstaActivo
+        DATETIME CreadoEn
+        DATETIME UltimoAcceso
     }
 
-    CelestialBodies {
-        INT BodyId PK
-        VARCHAR Name
-        ENUM Type
-        VARCHAR SubType
-        VARCHAR Constellation
-        VARCHAR RightAscension
-        VARCHAR Declination
-        DECIMAL Distance
-        DECIMAL ApparentMagnitude
-        DECIMAL AbsoluteMagnitude
-        DECIMAL Mass
-        DECIMAL Radius
-        INT Temperature
-        TEXT Description
-        DATE DiscoveryDate
-        VARCHAR NASA_ImageURL
-        TINYINT IsVerified
-        INT CreatedBy FK
-        DATETIME CreatedAt
+    CuerposCelestes {
+        INT IdCuerpo PK
+        VARCHAR Nombre
+        ENUM Tipo
+        VARCHAR Subtipo
+        VARCHAR Constelacion
+        VARCHAR AscensionRecta
+        VARCHAR Declinacion
+        DECIMAL Distancia
+        DECIMAL MagnitudAparente
+        DECIMAL MagnitudAbsoluta
+        DECIMAL Masa
+        DECIMAL Radio
+        INT Temperatura
+        TEXT Descripcion
+        DATE FechaDescubrimiento
+        VARCHAR URLImagenNASA
+        TINYINT EstaVerificado
+        INT CreadoPor FK
+        DATETIME CreadoEn
     }
 
-    Discoveries {
-        INT DiscoveryId PK
-        VARCHAR Title
-        TEXT Description
-        VARCHAR Coordinates
-        DATETIME DiscoveryDate
-        INT ReportedBy FK
-        INT CelestialBodyId FK
-        ENUM Status
-        JSON NASA_API_Data
-        DATETIME CreatedAt
-        DATETIME VerifiedAt
-        INT VerifiedBy FK
+    Descubrimientos {
+        INT IdDescubrimiento PK
+        VARCHAR Titulo
+        TEXT Descripcion
+        VARCHAR Coordenadas
+        DATETIME FechaDescubrimiento
+        INT ReportadoPor FK
+        INT IdCuerpoCeleste FK
+        ENUM Estado
+        JSON DatosAPI_NASA
+        DATETIME CreadoEn
+        DATETIME VerificadoEn
+        INT VerificadoPor FK
     }
 
-    Votes {
-        INT VoteId PK
-        INT DiscoveryId FK
-        INT UserId FK
-        ENUM VoteType
-        DATETIME CreatedAt
+    Votos {
+        INT IdVoto PK
+        INT IdDescubrimiento FK
+        INT IdUsuario FK
+        ENUM TipoVoto
+        DATETIME CreadoEn
     }
 
-    ExplorationHistory {
-        INT HistoryId PK
-        INT UserId FK
-        INT CelestialBodyId FK
-        DATETIME VisitedAt
-        INT TimeSpent
+    HistorialExploracion {
+        INT IdHistorial PK
+        INT IdUsuario FK
+        INT IdCuerpoCeleste FK
+        DATETIME VisitadoEn
+        INT TiempoDedicado
     }
 
-    Articles {
-        INT ArticleId PK
-        VARCHAR Title
-        TEXT Content
-        VARCHAR Summary
-        INT AuthorId FK
-        ENUM Category
-        TINYINT IsPublished
-        DATETIME PublishedAt
-        DATETIME CreatedAt
-        DATETIME UpdatedAt
-        INT ViewCount
+    Articulos {
+        INT IdArticulo PK
+        VARCHAR Titulo
+        TEXT Contenido
+        VARCHAR Resumen
+        INT IdAutor FK
+        ENUM Categoria
+        TINYINT EstaPublicado
+        DATETIME PublicadoEn
+        DATETIME CreadoEn
+        DATETIME ActualizadoEn
+        INT ContadorVistas
     }
 
-    Events {
-        INT EventId PK
-        VARCHAR Title
-        TEXT Description
-        ENUM EventType
-        DATETIME StartDate
-        DATETIME EndDate
-        VARCHAR Location
-        VARCHAR Visibility
-        INT CreatedBy FK
-        DATETIME CreatedAt
-        TINYINT IsActive
+    Eventos {
+        INT IdEvento PK
+        VARCHAR Titulo
+        TEXT Descripcion
+        ENUM TipoEvento
+        DATETIME FechaInicio
+        DATETIME FechaFin
+        VARCHAR Ubicacion
+        VARCHAR Visibilidad
+        INT CreadoPor FK
+        DATETIME CreadoEn
+        TINYINT EstaActivo
     }
 
-    Favorites {
-        INT FavoriteId PK
-        INT UserId FK
-        INT CelestialBodyId FK
-        INT ArticleId FK
-        INT DiscoveryId FK
-        DATETIME CreatedAt
+    Favoritos {
+        INT IdFavorito PK
+        INT IdUsuario FK
+        INT IdCuerpoCeleste FK
+        INT IdArticulo FK
+        INT IdDescubrimiento FK
+        DATETIME CreadoEn
     }
 
-    Comments {
-        INT CommentId PK
-        TEXT Content
-        INT UserId FK
-        INT DiscoveryId FK
-        INT ArticleId FK
-        INT ParentCommentId FK
-        DATETIME CreatedAt
-        TINYINT IsActive
+    Comentarios {
+        INT IdComentario PK
+        TEXT Contenido
+        INT IdUsuario FK
+        INT IdDescubrimiento FK
+        INT IdArticulo FK
+        INT IdComentarioPadre FK
+        DATETIME CreadoEn
+        TINYINT EstaActivo
     }
 
-    Users ||--o{ CelestialBodies : "CreatedBy"
-    Users ||--o{ Discoveries : "ReportedBy"
-    Users ||--o{ Discoveries : "VerifiedBy"
-    Users ||--o{ ExplorationHistory : "explores"
-    Users ||--o{ Articles : "writes"
-    Users ||--o{ Events : "creates"
-    Users ||--o{ Votes : "casts"
-    Users ||--o{ Favorites : "saves"
-    Users ||--o{ Comments : "writes"
+    Usuarios ||--o{ CuerposCelestes : "crea"
+    Usuarios ||--o{ Descubrimientos : "reporta"
+    Usuarios ||--o{ Descubrimientos : "verifica"
+    Usuarios ||--o{ HistorialExploracion : "explora"
+    Usuarios ||--o{ Articulos : "escribe"
+    Usuarios ||--o{ Eventos : "crea"
+    Usuarios ||--o{ Votos : "emite"
+    Usuarios ||--o{ Favoritos : "guarda"
+    Usuarios ||--o{ Comentarios : "escribe"
     
-    CelestialBodies ||--o{ Discoveries : "referenced_in"
-    CelestialBodies ||--o{ ExplorationHistory : "visited_in"
-    CelestialBodies }o--o{ Favorites : "favorited_as"
+    CuerposCelestes ||--o{ Descubrimientos : "referenciado_en"
+    CuerposCelestes ||--o{ HistorialExploracion : "visitado_en"
+    CuerposCelestes }o--o{ Favoritos : "marcado_como_favorito"
     
-    Discoveries ||--o{ Votes : "receives"
-    Discoveries }o--o{ Favorites : "favorited_as"
-    Discoveries ||--o{ Comments : "commented_on"
+    Descubrimientos ||--o{ Votos : "recibe"
+    Descubrimientos }o--o{ Favoritos : "marcado_como_favorito"
+    Descubrimientos ||--o{ Comentarios : "comentado_en"
     
-    Articles }o--o{ Favorites : "favorited_as"
-    Articles ||--o{ Comments : "commented_on"
+    Articulos }o--o{ Favoritos : "marcado_como_favorito"
+    Articulos ||--o{ Comentarios : "comentado_en"
     
-    Comments }o--|| Comments : "replies_to"
+    Comentarios }o--|| Comentarios : "responde_a"
 ```
