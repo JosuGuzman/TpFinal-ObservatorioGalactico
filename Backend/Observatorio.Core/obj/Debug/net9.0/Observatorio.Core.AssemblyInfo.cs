@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Observatorio.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2b877624f71820f720b53ff9af77321c8ca27a85")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dc1dd842f61012a99d5426988e88715ef6af42f7")]
 [assembly: System.Reflection.AssemblyProductAttribute("Observatorio.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Observatorio.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
