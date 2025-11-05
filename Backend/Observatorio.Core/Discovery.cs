@@ -14,8 +14,10 @@ namespace Observatorio.Core.Entities
         public DateTime CreatedAt { get; set; }
         public DateTime? VerifiedAt { get; set; }
         public int? VerifiedBy { get; set; }
-        public  required User Reporter { get; set; }
-        public required CelestialBody CelestialBody { get; set; }
         public int Rating { get; set; }
+
+        public User Reporter { get; set; }
+        public User Verifier { get; set; }
+        public CelestialBody CelestialBody { get; set; }
     }
 }

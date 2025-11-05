@@ -21,5 +21,7 @@ namespace Observatorio.Core.Entities
         public bool IsVerified { get; set; }
         public int? CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        public User Creator { get; set; }
     }
 }
