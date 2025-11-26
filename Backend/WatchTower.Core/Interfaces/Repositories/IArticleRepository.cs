@@ -10,4 +10,5 @@ public interface IArticleRepository
     Task<bool> UnpublishAsync(int articleId);
     Task IncrementViewCountAsync(int articleId);
     Task<IEnumerable<Article>> GetRecentArticlesAsync(int count);
+    Task<bool> IsAuthorAsync(int articleId, int userId);
 }
