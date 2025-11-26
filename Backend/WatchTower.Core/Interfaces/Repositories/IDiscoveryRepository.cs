@@ -10,4 +10,5 @@ public interface IDiscoveryRepository
     Task<bool> UpdateStatusAsync(int discoveryId, DiscoveryStatus status, int verifiedBy);
     Task<IEnumerable<Discovery>> GetUserDiscoveriesAsync(int userId);
     Task<int> GetDiscoveryCountAsync(DiscoveryStatus? status = null);
+    Task<bool> HasUserVotedAsync(int discoveryId, int userId);
 }
