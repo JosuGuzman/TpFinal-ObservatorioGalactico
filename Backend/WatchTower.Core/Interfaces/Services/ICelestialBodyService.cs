@@ -7,4 +7,5 @@ public interface ICelestialBodyService
     Task<CelestialBodyResponse> CreateAsync(CelestialBodyCreateRequest request, int createdBy);
     Task<CelestialBodyResponse?> UpdateAsync(int id, CelestialBodyUpdateRequest request);
     Task<bool> VerifyAsync(int id, int verifiedBy);
+    Task<IEnumerable<CelestialBodyResponse>> GetRecentAsync(int count);
 }
