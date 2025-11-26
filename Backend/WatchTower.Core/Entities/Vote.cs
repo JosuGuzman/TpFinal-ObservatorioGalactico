@@ -1,3 +1,5 @@
+using WatchTower.Core.Enums;
+
 namespace WatchTower.Core.Entities;
 
 public class Vote

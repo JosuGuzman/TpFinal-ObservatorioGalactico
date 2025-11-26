@@ -1,3 +1,5 @@
+using WatchTower.Core.Enums;
+
 namespace WatchTower.Core.Entities;
 
 public class Article
@@ -13,6 +15,7 @@ public class Article
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public int ViewCount { get; set; }
-    
+
     // Navigation properties
     public virtual User Author { get; set; } = null!;
+}
