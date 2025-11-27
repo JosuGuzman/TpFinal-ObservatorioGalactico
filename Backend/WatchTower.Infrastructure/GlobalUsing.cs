@@ -13,3 +13,4 @@ global using System.Text;
 global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.Extensions.Configuration;
 global using System.Text.Json;
+global using Microsoft.Extensions.Logging;
