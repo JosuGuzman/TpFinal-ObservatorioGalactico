@@ -9,4 +9,5 @@ public interface IArticleService
     Task<bool> PublishAsync(int articleId, int userId);
     Task<bool> UnpublishAsync(int articleId, int userId);
     Task<bool> IncrementViewCountAsync(int id);
+    Task<IEnumerable<ArticleResponse>> GetRecentArticlesAsync(int count);
 }
