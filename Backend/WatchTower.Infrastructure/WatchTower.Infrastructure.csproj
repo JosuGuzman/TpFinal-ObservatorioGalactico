@@ -13,4 +13,8 @@
     <PackageReference Include="MySql.Data" Version="9.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WatchTower.Core\WatchTower.Core.csproj" />
+  </ItemGroup>
+
 </Project>
