@@ -10,4 +10,5 @@ public interface IUserRepository
     Task<bool> UserExistsAsync(string username, string email);
     Task<IEnumerable<User>> GetUsersByRoleAsync(UserRole role);
     Task<bool> DeactivateUserAsync(int userId);
+    Task UpdateLastLoginAsync(int userId);
 }
