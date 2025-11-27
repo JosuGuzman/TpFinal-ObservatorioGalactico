@@ -30,7 +30,7 @@ public class FavoriteRepository : IFavoriteRepository
             LEFT JOIN Discoveries d ON f.DiscoveryId = d.DiscoveryId
             WHERE f.UserId = @UserId
             ORDER BY f.CreatedAt DESC";
-        
+
         return await connection.QueryAsync<Favorite>(sql, new { UserId = userId });
     }
 
@@ -40,7 +40,7 @@ public class FavoriteRepository : IFavoriteRepository
         const string sql = @"
             INSERT INTO Favorites (UserId, CelestialBodyId, ArticleId, DiscoveryId)
             VALUES (@UserId, @CelestialBodyId, @ArticleId, @DiscoveryId)";
-        
+
         try
         {
             var affected = await connection.ExecuteAsync(sql, favorite);
@@ -69,15 +69,15 @@ public class FavoriteRepository : IFavoriteRepository
             AND CelestialBodyId = @CelestialBodyId 
             AND ArticleId = @ArticleId 
             AND DiscoveryId = @DiscoveryId";
-        
-        var count = await connection.ExecuteScalarAsync<int>(sql, new 
-        { 
+
+        var count = await connection.ExecuteScalarAsync<int>(sql, new
+        {
             UserId = userId,
             CelestialBodyId = celestialBodyId,
             ArticleId = articleId,
             DiscoveryId = discoveryId
         });
-        
+
         return count > 0;
     }
 
@@ -90,15 +90,15 @@ public class FavoriteRepository : IFavoriteRepository
             AND CelestialBodyId = @CelestialBodyId 
             AND ArticleId = @ArticleId 
             AND DiscoveryId = @DiscoveryId";
-        
-        var affected = await connection.ExecuteAsync(sql, new 
-        { 
+
+        var affected = await connection.ExecuteAsync(sql, new
+        {
             UserId = userId,
             CelestialBodyId = celestialBodyId,
             ArticleId = articleId,
             DiscoveryId = discoveryId
         });
-        
+
         return affected > 0;
     }
 }
