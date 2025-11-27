@@ -15,3 +15,8 @@ global using Microsoft.Extensions.Configuration;
 global using System.Text.Json;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.DependencyInjection;
+global using WatchTower.Infrastructure.Data.Repositories;
+global using WatchTower.Infrastructure.Services;
+global using WatchTower.Infrastructure.External;
+global using WatchTower.Infrastructure.BackgroundServices;
+global using WatchTower.Infrastructure.Mappings;
