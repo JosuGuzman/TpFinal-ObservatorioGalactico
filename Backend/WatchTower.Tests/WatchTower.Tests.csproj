@@ -16,4 +16,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WatchTower.Infrastructure\WatchTower.Infrastructure.csproj" />
+    <ProjectReference Include="..\WatchTower.Core\WatchTower.Core.csproj" />
+  </ItemGroup>
+
 </Project>
