@@ -1,5 +1,3 @@
-using WatchTower.Infrastructure.Mappings;
-
 namespace WatchTower.Infrastructure.Extensions;
 
 public static class ServiceCollectionExtensions
@@ -17,6 +15,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IArticleRepository, ArticleRepository>();
         services.AddScoped<IFavoriteRepository, FavoriteRepository>();
         services.AddScoped<IExplorationRepository, ExplorationRepository>();
+        services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<ICommentRepository, CommentRepository>();
 
         // Services
         services.AddScoped<IAuthService, AuthService>();
@@ -24,6 +24,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICelestialBodyService, CelestialBodyService>();
         services.AddScoped<IDiscoveryService, DiscoveryService>();
         services.AddScoped<IArticleService, ArticleService>();
+        services.AddScoped<IFavoriteService, FavoriteService>();
+        services.AddScoped<IExplorationService, ExplorationService>();
+        services.AddScoped<ICommentService, CommentService>();
+        services.AddScoped<IEventService, EventService>();
         services.AddScoped<IExportService, ExportService>();
 
         // External Services
