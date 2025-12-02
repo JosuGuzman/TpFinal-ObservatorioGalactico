@@ -1,65 +1,137 @@
-USE `BD_WatchTower`;
+USE BD_WatchTower;
 
--- Trigger para actualizar UpdatedAt en artículos
 DELIMITER $$
-CREATE TRIGGER `UpdateArticleTimestamp` 
-BEFORE UPDATE ON `Articles`
+
+/* ============================================================
+   TRIGGERS – WATCHTOWER
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1) TRIGGERS PARA ARTÍCULOS – Generación y actualización de SLUG
+   ------------------------------------------------------------ */
+
+CREATE TRIGGER trg_articles_before_insert
+BEFORE INSERT ON Articles
+FOR EACH ROW
+BEGIN
+    IF NEW.Slug IS NULL OR NEW.Slug = '' THEN
+        SET NEW.Slug = fn_slugify(NEW.Title);
+    END IF;
+END $$
+
+CREATE TRIGGER trg_articles_before_update
+BEFORE UPDATE ON Articles
+FOR EACH ROW
+BEGIN
+    IF NEW.Title <> OLD.Title THEN
+        SET NEW.Slug = fn_slugify(NEW.Title);
+    END IF;
+END $$
+
+/* ------------------------------------------------------------
+   2) Actualización automática del campo UpdatedAt
+   ------------------------------------------------------------ */
+
+CREATE TRIGGER trg_galaxies_update_timestamp
+BEFORE UPDATE ON Galaxies
 FOR EACH ROW
 BEGIN
     SET NEW.UpdatedAt = NOW();
-END$$
-DELIMITER ;
+END $$
 
--- Trigger para establecer PublishedAt cuando se publica un artículo
-DELIMITER $$
-CREATE TRIGGER `SetArticlePublishDate` 
-BEFORE UPDATE ON `Articles`
+CREATE TRIGGER trg_stars_update_timestamp
+BEFORE UPDATE ON Stars
 FOR EACH ROW
 BEGIN
-    IF NEW.IsPublished = 1 AND OLD.IsPublished = 0 THEN
-        SET NEW.PublishedAt = NOW();
-    END IF;
-END$$
-DELIMITER ;
+    SET NEW.UpdatedAt = NOW();
+END $$
 
--- Trigger para incrementar contador de vistas cuando se visita un artículo
-DELIMITER $$
-CREATE TRIGGER `IncrementArticleViewCount` 
-BEFORE UPDATE ON `Articles`
+CREATE TRIGGER trg_planets_update_timestamp
+BEFORE UPDATE ON Planets
 FOR EACH ROW
 BEGIN
-    IF NEW.ViewCount < OLD.ViewCount THEN
-        SET NEW.ViewCount = OLD.ViewCount + 1;
-    END IF;
-END$$
-DELIMITER ;
+    SET NEW.UpdatedAt = NOW();
+END $$
 
--- Trigger para registrar automáticamente en el historial cuando se marca como favorito
-DELIMITER $$
-CREATE TRIGGER `AddToHistoryOnFavorite` 
-AFTER INSERT ON `Favorites`
+/* ------------------------------------------------------------
+   3) Cálculo automático de Habitabilidad en Planetas
+   ------------------------------------------------------------ */
+
+CREATE TRIGGER trg_planets_before_insert
+BEFORE INSERT ON Planets
 FOR EACH ROW
 BEGIN
-    IF NEW.CelestialBodyId IS NOT NULL THEN
-        INSERT INTO ExplorationHistory (UserId, CelestialBodyId, VisitedAt)
-        VALUES (NEW.UserId, NEW.CelestialBodyId, NOW())
-        ON DUPLICATE KEY UPDATE VisitedAt = NOW(), TimeSpent = TimeSpent + 60;
-    END IF;
-END$$
-DELIMITER ;
+    SET NEW.HabitabilityScore = fn_habitability(
+        NEW.SurfaceTempK,
+        NEW.OrbitalDistanceAU,
+        NEW.MassEarth,
+        NEW.RadiusEarth
+    );
+END $$
 
--- Trigger para prevenir que usuarios inactivos realicen acciones
-DELIMITER $$
-CREATE TRIGGER `PreventInactiveUserActions` 
-BEFORE INSERT ON `Discoveries`
+CREATE TRIGGER trg_planets_before_update
+BEFORE UPDATE ON Planets
 FOR EACH ROW
 BEGIN
-    DECLARE user_active TINYINT;
-    
-    SELECT IsActive INTO user_active FROM Users WHERE UserId = NEW.ReportedBy;
-    
-    IF user_active = 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Usuario inactivo no puede reportar descubrimientos';
+    SET NEW.HabitabilityScore = fn_habitability(
+        NEW.SurfaceTempK,
+        NEW.OrbitalDistanceAU,
+        NEW.MassEarth,
+        NEW.RadiusEarth
+    );
+END $$
+
+/* ------------------------------------------------------------
+   4) LOG automático de creación de galaxias
+   ------------------------------------------------------------ */
+
+CREATE TRIGGER trg_log_galaxy_insert
+AFTER INSERT ON Galaxies
+FOR EACH ROW
+BEGIN
+    INSERT INTO SystemLogs(UserID, EventType, Description, Status)
+    VALUES(NULL, 'GalaxyInsert', CONCAT('Se creó la galaxia ', NEW.Name), 'OK');
+END $$
+
+/* ------------------------------------------------------------
+   5) Prevención de corrupción de contador de visitas
+   ------------------------------------------------------------ */
+
+CREATE TRIGGER trg_article_view_count
+BEFORE UPDATE ON Articles
+FOR EACH ROW
+BEGIN
+    IF NEW.Views < OLD.Views THEN
+        SET NEW.Views = OLD.Views;
     END IF;
-END$$
+END $$
+
+/* ------------------------------------------------------------
+   6) Limpieza automática cuando se elimina un usuario
+   ------------------------------------------------------------ */
+
+CREATE TRIGGER trg_user_before_delete
+BEFORE DELETE ON Users
+FOR EACH ROW
+BEGIN
+    DELETE FROM UserFavorites WHERE UserID = OLD.UserID;
+    DELETE FROM SavedSearches WHERE UserID = OLD.UserID;
+    DELETE FROM ExplorationHistory WHERE UserID = OLD.UserID;
+    DELETE FROM DiscoveryVotes WHERE VoterUserID = OLD.UserID;
+    DELETE FROM Discoveries WHERE ReporterUserID = OLD.UserID;
+END $$
+
+/* ------------------------------------------------------------
+   7) Si la estrella cambia de galaxia, limpiar sus planetas
+   ------------------------------------------------------------ */
+
+CREATE TRIGGER trg_star_change_cleanup
+BEFORE UPDATE ON Stars
+FOR EACH ROW
+BEGIN
+    IF NEW.GalaxyID <> OLD.GalaxyID THEN
+        DELETE FROM Planets WHERE StarID = OLD.StarID;
+    END IF;
+END $$
+
 DELIMITER ;
