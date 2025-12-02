@@ -1,152 +1,452 @@
-USE `BD_WatchTower`;
+USE WatchTower;
 
--- Procedimiento para búsqueda en cuerpos celestes (para barra de búsqueda)
 DELIMITER $$
-CREATE PROCEDURE `SearchCelestialBodies`(
-    IN search_term VARCHAR(100),
-    IN body_type VARCHAR(50),
-    IN max_distance DECIMAL(15,2),
-    IN min_magnitude DECIMAL(5,2)
+
+/* ============================================================
+   1) USUARIOS Y AUTENTICACIÓN
+   ============================================================ */
+
+CREATE PROCEDURE sp_register_user(
+    IN pEmail VARCHAR(255),
+    IN pUserName VARCHAR(100),
+    IN pPasswordHash VARCHAR(255),
+    IN pRoleID SMALLINT,
+    OUT pUserID INT
 )
 BEGIN
-    SELECT 
-        BodyId, 
-        Name, 
-        Type, 
-        SubType,
-        Constellation,
-        Distance,
-        ApparentMagnitude,
-        Description,
-        NASA_ImageURL
-    FROM CelestialBodies 
-    WHERE 
-        (Name LIKE CONCAT('%', search_term, '%') 
-        OR Description LIKE CONCAT('%', search_term, '%')
-        OR Constellation LIKE CONCAT('%', search_term, '%'))
-        AND (body_type IS NULL OR Type = body_type)
-        AND (max_distance IS NULL OR Distance <= max_distance)
-        AND (min_magnitude IS NULL OR ApparentMagnitude >= min_magnitude)
-        AND IsVerified = 1
-    ORDER BY 
-        CASE 
-            WHEN Name LIKE CONCAT(search_term, '%') THEN 1
-            WHEN Constellation LIKE CONCAT(search_term, '%') THEN 2
-            ELSE 3
-        END,
-        ApparentMagnitude ASC;
-END$$
-DELIMITER ;
+    INSERT INTO Users (Email, UserName, PasswordHash, RoleID)
+    VALUES (pEmail, pUserName, pPasswordHash, pRoleID);
+    SET pUserID = LAST_INSERT_ID();
+END $$
 
--- Procedimiento para búsqueda en descubrimientos
-DELIMITER $$
-CREATE PROCEDURE `SearchDiscoveries`(
-    IN search_term VARCHAR(100),
-    IN status_filter VARCHAR(20),
-    IN min_rating INT
+CREATE PROCEDURE sp_login(IN pEmail VARCHAR(255))
+BEGIN
+    SELECT * FROM Users WHERE Email = pEmail;
+END $$
+
+CREATE PROCEDURE sp_update_last_login(IN pUserID INT)
+BEGIN
+    UPDATE Users SET LastLogin = NOW() WHERE UserID = pUserID;
+END $$
+
+/* ============================================================
+   2) GALAXIAS (CRUD COMPLETO)
+   ============================================================ */
+
+-- ALTA
+CREATE PROCEDURE sp_insert_galaxy(
+    IN pName VARCHAR(200),
+    IN pType VARCHAR(50),
+    IN pDistance DOUBLE,
+    IN pMag FLOAT,
+    IN pRA DOUBLE,
+    IN pDec DOUBLE,
+    IN pDescription TEXT
 )
 BEGIN
-    SELECT 
-        d.DiscoveryId,
-        d.Title,
-        d.Description,
-        d.Status,
-        d.CreatedAt,
-        u.Username AS ReportedBy,
-        CalculateDiscoveryRating(d.DiscoveryId) AS Rating,
-        cb.Name AS CelestialBodyName
+    INSERT INTO Galaxies(Name, Type, DistanceLy, ApparentMagnitude, RA, Dec, Description)
+    VALUES(pName, pType, pDistance, pMag, pRA, pDec, pDescription);
+END $$
+
+-- UPDATE
+CREATE PROCEDURE sp_update_galaxy(
+    IN pGalaxyID INT,
+    IN pName VARCHAR(200),
+    IN pType VARCHAR(50),
+    IN pDistance DOUBLE,
+    IN pMag FLOAT,
+    IN pRA DOUBLE,
+    IN pDec DOUBLE,
+    IN pDescription TEXT
+)
+BEGIN
+    UPDATE Galaxies
+    SET Name = pName,
+        Type = pType,
+        DistanceLy = pDistance,
+        ApparentMagnitude = pMag,
+        RA = pRA,
+        Dec = pDec,
+        Description = pDescription
+    WHERE GalaxyID = pGalaxyID;
+END $$
+
+-- BORRADO CON CASCADA MANUAL (Estrellas + Planetas)
+CREATE PROCEDURE sp_delete_galaxy(IN pGalaxyID INT)
+BEGIN
+    DELETE FROM Planets
+    WHERE StarID IN (SELECT StarID FROM Stars WHERE GalaxyID = pGalaxyID);
+
+    DELETE FROM Stars
+    WHERE GalaxyID = pGalaxyID;
+
+    DELETE FROM Galaxies
+    WHERE GalaxyID = pGalaxyID;
+END $$
+
+-- GET
+CREATE PROCEDURE sp_get_galaxy_by_id(IN pGalaxyID INT)
+BEGIN
+    SELECT * FROM Galaxies WHERE GalaxyID = pGalaxyID;
+END $$
+
+/* ============================================================
+   3) ESTRELLAS (CRUD COMPLETO)
+   ============================================================ */
+
+-- ALTA
+CREATE PROCEDURE sp_insert_star(
+    IN pGalaxyID INT,
+    IN pName VARCHAR(200),
+    IN pSpectral VARCHAR(10),
+    IN pTemp INT,
+    IN pMass DOUBLE,
+    IN pRadius DOUBLE,
+    IN pLum DOUBLE,
+    IN pDistance DOUBLE,
+    IN pRA DOUBLE,
+    IN pDec DOUBLE
+)
+BEGIN
+    INSERT INTO Stars (GalaxyID, Name, SpectralType, SurfaceTempK, MassSolar, RadiusSolar,
+                       LuminositySolar, DistanceLy, RA, Dec)
+    VALUES(pGalaxyID, pName, pSpectral, pTemp, pMass, pRadius, pLum, pDistance, pRA, pDec);
+END $$
+
+-- UPDATE
+CREATE PROCEDURE sp_update_star(
+    IN pStarID INT,
+    IN pName VARCHAR(200),
+    IN pSpectral VARCHAR(10),
+    IN pTemp INT,
+    IN pMass DOUBLE,
+    IN pRadius DOUBLE,
+    IN pLum DOUBLE,
+    IN pDistance DOUBLE,
+    IN pRA DOUBLE,
+    IN pDec DOUBLE
+)
+BEGIN
+    UPDATE Stars
+    SET Name = pName,
+        SpectralType = pSpectral,
+        SurfaceTempK = pTemp,
+        MassSolar = pMass,
+        RadiusSolar = pRadius,
+        LuminositySolar = pLum,
+        DistanceLy = pDistance,
+        RA = pRA,
+        Dec = pDec
+    WHERE StarID = pStarID;
+END $$
+
+-- BORRADO CON CASCADA MANUAL (Planetas)
+CREATE PROCEDURE sp_delete_star(IN pStarID INT)
+BEGIN
+    DELETE FROM Planets WHERE StarID = pStarID;
+    DELETE FROM Stars WHERE StarID = pStarID;
+END $$
+
+-- GET
+CREATE PROCEDURE sp_get_star_by_id(IN pStarID INT)
+BEGIN
+    SELECT * FROM Stars WHERE StarID = pStarID;
+END $$
+
+/* ============================================================
+   4) PLANETAS (CRUD COMPLETO)
+   ============================================================ */
+
+-- ALTA
+CREATE PROCEDURE sp_insert_planet(
+    IN pStarID INT,
+    IN pName VARCHAR(200),
+    IN pType VARCHAR(50),
+    IN pMass DOUBLE,
+    IN pRadius DOUBLE,
+    IN pPeriod DOUBLE,
+    IN pDistance DOUBLE,
+    IN pEcc DOUBLE,
+    IN pHabit DOUBLE
+)
+BEGIN
+    INSERT INTO Planets(StarID, Name, PlanetType, MassEarth, RadiusEarth, OrbitalPeriodDays,
+                        OrbitalDistanceAU, Eccentricity, HabitabilityScore)
+    VALUES(pStarID, pName, pType, pMass, pRadius, pPeriod, pDistance, pEcc, pHabit);
+END $$
+
+-- UPDATE
+CREATE PROCEDURE sp_update_planet(
+    IN pPlanetID INT,
+    IN pName VARCHAR(200),
+    IN pType VARCHAR(50),
+    IN pMass DOUBLE,
+    IN pRadius DOUBLE,
+    IN pPeriod DOUBLE,
+    IN pDistance DOUBLE,
+    IN pEcc DOUBLE,
+    IN pHabit DOUBLE
+)
+BEGIN
+    UPDATE Planets
+    SET Name = pName,
+        PlanetType = pType,
+        MassEarth = pMass,
+        RadiusEarth = pRadius,
+        OrbitalPeriodDays = pPeriod,
+        OrbitalDistanceAU = pDistance,
+        Eccentricity = pEcc,
+        HabitabilityScore = pHabit
+    WHERE PlanetID = pPlanetID;
+END $$
+
+-- BORRADO
+CREATE PROCEDURE sp_delete_planet(IN pPlanetID INT)
+BEGIN
+    DELETE FROM Planets WHERE PlanetID = pPlanetID;
+END $$
+
+-- GET
+CREATE PROCEDURE sp_get_planet_by_id(IN pPlanetID INT)
+BEGIN
+    SELECT * FROM Planets WHERE PlanetID = pPlanetID;
+END $$
+
+/* ============================================================
+   5) DESCUBRIMIENTOS Y VOTOS
+   ============================================================ */
+
+-- ALTA
+CREATE PROCEDURE sp_create_discovery(
+    IN pUserID INT,
+    IN pObjectType VARCHAR(50),
+    IN pName VARCHAR(200),
+    IN pRA DOUBLE,
+    IN pDec DOUBLE,
+    IN pDescription TEXT
+)
+BEGIN
+    INSERT INTO Discoveries(ReporterUserID, ObjectType, SuggestedName, RA, Dec, Description)
+    VALUES(pUserID, pObjectType, pName, pRA, pDec, pDescription);
+END $$
+
+-- UPDATE ESTADO
+CREATE PROCEDURE sp_update_discovery_status(IN pDiscoveryID INT, IN pState VARCHAR(50))
+BEGIN
+    UPDATE Discoveries SET State = pState WHERE DiscoveryID = pDiscoveryID;
+END $$
+
+-- BORRADO CON CASCADA MANUAL (votos relacionados)
+CREATE PROCEDURE sp_delete_discovery(IN pDiscoveryID INT)
+BEGIN
+    DELETE FROM DiscoveryVotes WHERE DiscoveryID = pDiscoveryID;
+    DELETE FROM Discoveries WHERE DiscoveryID = pDiscoveryID;
+END $$
+
+-- GET DETAIL
+CREATE PROCEDURE sp_get_discovery_by_id(IN pDiscoveryID INT)
+BEGIN
+    SELECT d.*, 
+           COALESCE(v.upvotes,0) AS Upvotes,
+           COALESCE(v.downvotes,0) AS Downvotes
     FROM Discoveries d
-    INNER JOIN Users u ON d.ReportedBy = u.UserId
-    LEFT JOIN CelestialBodies cb ON d.CelestialBodyId = cb.BodyId
-    WHERE 
-        (d.Title LIKE CONCAT('%', search_term, '%') 
-        OR d.Description LIKE CONCAT('%', search_term, '%')
-        OR cb.Name LIKE CONCAT('%', search_term, '%'))
-        AND (status_filter IS NULL OR d.Status = status_filter)
-    HAVING (min_rating IS NULL OR Rating >= min_rating)
-    ORDER BY d.CreatedAt DESC;
-END$$
-DELIMITER ;
+    LEFT JOIN vw_discovery_votes v ON v.DiscoveryID = d.DiscoveryID
+    WHERE d.DiscoveryID = pDiscoveryID;
+END $$
 
--- Procedimiento para búsqueda en artículos
-DELIMITER $$
-CREATE PROCEDURE `SearchArticles`(
-    IN search_term VARCHAR(100),
-    IN category_filter VARCHAR(20),
-    IN published_only BOOLEAN
+/* ============================================================
+   6) ARTÍCULOS
+   ============================================================ */
+
+CREATE PROCEDURE sp_create_article(
+    IN pTitle VARCHAR(300),
+    IN pSlug VARCHAR(300),
+    IN pContent LONGTEXT,
+    IN pUserID INT
 )
 BEGIN
-    SELECT 
-        ArticleId,
-        Title,
-        Summary,
-        Category,
-        CreatedAt,
-        ViewCount,
-        (SELECT Username FROM Users WHERE UserId = AuthorId) AS AuthorName
-    FROM Articles 
-    WHERE 
-        (Title LIKE CONCAT('%', search_term, '%') 
-        OR Content LIKE CONCAT('%', search_term, '%')
-        OR Summary LIKE CONCAT('%', search_term, '%'))
-        AND (category_filter IS NULL OR Category = category_filter)
-        AND (NOT published_only OR IsPublished = 1)
-    ORDER BY 
-        CASE 
-            WHEN published_only THEN PublishedAt 
-            ELSE CreatedAt 
-        END DESC;
-END$$
-DELIMITER ;
+    INSERT INTO Articles (Title, Slug, Content, AuthorUserID)
+    VALUES(pTitle, pSlug, pContent, pUserID);
+END $$
 
--- Procedimiento para obtener estadísticas del usuario
-DELIMITER $$
-CREATE PROCEDURE `GetUserStatistics`(IN user_id INT)
-BEGIN
-    SELECT 
-        u.Username,
-        u.Role,
-        u.CreatedAt,
-        (SELECT COUNT(*) FROM Discoveries WHERE ReportedBy = user_id) AS TotalDiscoveries,
-        (SELECT COUNT(*) FROM Discoveries WHERE ReportedBy = user_id AND Status = 'Verified') AS VerifiedDiscoveries,
-        (SELECT COUNT(*) FROM ExplorationHistory WHERE UserId = user_id) AS ObjectsExplored,
-        (SELECT COUNT(*) FROM Favorites WHERE UserId = user_id) AS TotalFavorites,
-        (SELECT COUNT(*) FROM Comments WHERE UserId = user_id) AS TotalComments
-    FROM Users u
-    WHERE u.UserId = user_id;
-END$$
-DELIMITER ;
-
--- Procedimiento para agregar descubrimiento con validación
-DELIMITER $$
-CREATE PROCEDURE `AddDiscovery`(
-    IN p_title VARCHAR(200),
-    IN p_description TEXT,
-    IN p_coordinates VARCHAR(100),
-    IN p_reported_by INT,
-    IN p_celestial_body_id INT
+CREATE PROCEDURE sp_update_article(
+    IN pArticleID INT,
+    IN pTitle VARCHAR(300),
+    IN pContent LONGTEXT,
+    IN pState VARCHAR(30)
 )
 BEGIN
-    DECLARE user_exists INT DEFAULT 0;
-    DECLARE body_exists INT DEFAULT 0;
-    
-    -- Verificar que el usuario existe
-    SELECT COUNT(*) INTO user_exists FROM Users WHERE UserId = p_reported_by;
-    IF user_exists = 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Usuario no existe';
-    END IF;
-    
-    -- Verificar que el cuerpo celeste existe (si se proporciona)
-    IF p_celestial_body_id IS NOT NULL THEN
-        SELECT COUNT(*) INTO body_exists FROM CelestialBodies WHERE BodyId = p_celestial_body_id;
-        IF body_exists = 0 THEN
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cuerpo celeste no existe';
-        END IF;
-    END IF;
-    
-    INSERT INTO Discoveries (Title, Description, Coordinates, ReportedBy, CelestialBodyId)
-    VALUES (p_title, p_description, p_coordinates, p_reported_by, p_celestial_body_id);
-    
-    SELECT LAST_INSERT_ID() AS NewDiscoveryId;
-END$$
+    UPDATE Articles
+    SET Title = pTitle,
+        Content = pContent,
+        State = pState
+    WHERE ArticleID = pArticleID;
+END $$
+
+CREATE PROCEDURE sp_delete_article(IN pArticleID INT)
+BEGIN
+    DELETE FROM Articles WHERE ArticleID = pArticleID;
+END $$
+
+/* ============================================================
+   7) EVENTOS
+   ============================================================ */
+
+CREATE PROCEDURE sp_create_event(
+    IN pName VARCHAR(250),
+    IN pType VARCHAR(50),
+    IN pDate DATETIME,
+    IN pDesc TEXT,
+    IN pUserID INT
+)
+BEGIN
+    INSERT INTO Events(Name, Type, EventDate, Description, CreatedByUserID)
+    VALUES(pName, pType, pDate, pDesc, pUserID);
+END $$
+
+CREATE PROCEDURE sp_update_event(
+    IN pEventID INT,
+    IN pName VARCHAR(250),
+    IN pType VARCHAR(50),
+    IN pDate DATETIME,
+    IN pDesc TEXT
+)
+BEGIN
+    UPDATE Events
+    SET Name = pName,
+        Type = pType,
+        EventDate = pDate,
+        Description = pDesc
+    WHERE EventID = pEventID;
+END $$
+
+CREATE PROCEDURE sp_delete_event(IN pEventID INT)
+BEGIN
+    DELETE FROM Events WHERE EventID = pEventID;
+END $$
+
+/* ============================================================
+   8) FAVORITOS
+   ============================================================ */
+
+CREATE PROCEDURE sp_add_favorite(
+    IN pUserID INT,
+    IN pType VARCHAR(50),
+    IN pObjectID INT
+)
+BEGIN
+    INSERT INTO UserFavorites(UserID, ObjectType, ObjectID)
+    VALUES(pUserID, pType, pObjectID);
+END $$
+
+CREATE PROCEDURE sp_delete_favorite(IN pFavoriteID INT)
+BEGIN
+    DELETE FROM UserFavorites WHERE FavoriteID = pFavoriteID;
+END $$
+
+/* ============================================================
+   9) BÚSQUEDAS GUARDADAS
+   ============================================================ */
+
+CREATE PROCEDURE sp_save_search(
+    IN pUserID INT,
+    IN pName VARCHAR(200),
+    IN pCriteria JSON
+)
+BEGIN
+    INSERT INTO SavedSearches(UserID, Name, Criteria)
+    VALUES(pUserID, pName, pCriteria);
+END $$
+
+CREATE PROCEDURE sp_delete_saved_search(IN pSearchID INT)
+BEGIN
+    DELETE FROM SavedSearches WHERE SavedSearchID = pSearchID;
+END $$
+
+/* ============================================================
+   10) HISTORIAL
+   ============================================================ */
+
+CREATE PROCEDURE sp_add_history(
+    IN pUserID INT,
+    IN pType VARCHAR(50),
+    IN pObjectID INT,
+    IN pDuration INT,
+    IN pCriteria JSON
+)
+BEGIN
+    INSERT INTO ExplorationHistory(UserID, ObjectType, ObjectID, DurationSeconds, SearchCriteria)
+    VALUES(pUserID, pType, pObjectID, pDuration, pCriteria);
+END $$
+
+/* ============================================================
+   11) LOGS
+   ============================================================ */
+
+CREATE PROCEDURE sp_add_log(
+    IN pUserID INT,
+    IN pEvent VARCHAR(50),
+    IN pDesc TEXT,
+    IN pIP VARCHAR(45),
+    IN pStatus VARCHAR(20)
+)
+BEGIN
+    INSERT INTO SystemLogs(UserID, EventType, Description, IPAddress, Status)
+    VALUES(pUserID, pEvent, pDesc, pIP, pStatus);
+END $$
+
+/* ============================================================
+   12) BÚSQUEDA AVANZADA
+   ============================================================ */
+
+CREATE PROCEDURE sp_search_fulltext(
+    IN pQuery TEXT,
+    IN pLimit INT,
+    IN pOffset INT
+)
+BEGIN
+    SELECT 'Galaxy' AS Type, GalaxyID AS ID, Name AS Label
+    FROM Galaxies
+    WHERE MATCH(Name, Description) AGAINST(pQuery IN NATURAL LANGUAGE MODE)
+
+    UNION ALL
+    SELECT 'Star', StarID, Name
+    FROM Stars
+    WHERE MATCH(Name) AGAINST(pQuery)
+
+    UNION ALL
+    SELECT 'Planet', PlanetID, Name
+    FROM Planets
+    WHERE MATCH(Name) AGAINST(pQuery)
+
+    LIMIT pLimit OFFSET pOffset;
+END $$
+
+/* ============================================================
+   13) OBJETOS CERCANOS
+   ============================================================ */
+
+CREATE PROCEDURE sp_objects_nearby(
+    IN pRA DOUBLE,
+    IN pDec DOUBLE,
+    IN pRadius DOUBLE,
+    IN pLimit INT
+)
+BEGIN
+    SELECT 'Galaxy' AS Type, GalaxyID AS ID, Name, RA, Dec,
+           SQRT(POW(RA - pRA,2) + POW(Dec - pDec,2)) AS Distance
+    FROM Galaxies
+    HAVING Distance <= pRadius
+
+    UNION ALL
+
+    SELECT 'Star', StarID, Name, RA, Dec,
+           SQRT(POW(RA - pRA,2) + POW(Dec - pDec,2)) AS Distance
+    FROM Stars
+    HAVING Distance <= pRadius
+
+    ORDER BY Distance ASC
+    LIMIT pLimit;
+END $$
+
 DELIMITER ;
