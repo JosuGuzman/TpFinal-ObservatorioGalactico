@@ -1,4 +1,4 @@
-USE WatchTower;
+USE BD_WatchTower;
 
 DELIMITER $$
 
