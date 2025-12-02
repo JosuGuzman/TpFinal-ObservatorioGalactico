@@ -1,26 +1,26 @@
-USE `BD_WatchTower`;
+/* ============================================================
+   DCL – WATCHTOWER
+   Data Control Language (Seguridad y permisos de BD)
+   ============================================================ */
 
--- Crear usuarios para la aplicación
-CREATE USER 'astro_app'@'localhost' IDENTIFIED BY 'SecurePassword123!';
-CREATE USER 'astro_read'@'localhost' IDENTIFIED BY 'ReadOnlyPass123!';
+-- Crear usuarios internos del servidor MySQL
+CREATE USER 'watchtower_admin'@'%' IDENTIFIED BY 'AdminPassword123!';
+CREATE USER 'watchtower_api'@'%' IDENTIFIED BY 'ApiPassword123!';
+CREATE USER 'watchtower_readonly'@'%' IDENTIFIED BY 'ReadOnly123!';
 
--- Conceder permisos completos al usuario de la aplicación
-GRANT SELECT, INSERT, UPDATE, DELETE ON `BD_WatchTower`.* TO 'astro_app'@'localhost';
+-- Privilegios del ADMIN (control total del esquema)
+GRANT ALL PRIVILEGES ON WatchTower.* TO 'watchtower_admin'@'%';
 
--- Conceder permisos de solo lectura para reportes
-GRANT SELECT ON `BD_WatchTower`.* TO 'astro_read'@'localhost';
+-- Privilegios del API (permisos necesarios para el backend)
+GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE
+ON WatchTower.* TO 'watchtower_api'@'%';
 
--- Permisos específicos para ejecutar stored procedures
-GRANT EXECUTE ON PROCEDURE `BD_WatchTower`.`SearchCelestialBodies` TO 'astro_app'@'localhost';
-GRANT EXECUTE ON PROCEDURE `BD_WatchTower`.`SearchDiscoveries` TO 'astro_app'@'localhost';
-GRANT EXECUTE ON PROCEDURE `BD_WatchTower`.`SearchArticles` TO 'astro_app'@'localhost';
-GRANT EXECUTE ON PROCEDURE `BD_WatchTower`.`GetUserStatistics` TO 'astro_app'@'localhost';
-GRANT EXECUTE ON PROCEDURE `BD_WatchTower`.`AddDiscovery` TO 'astro_app'@'localhost';
+-- Permisos específicos para ejecutar SP y SF
+GRANT EXECUTE ON PROCEDURE WatchTower.* TO 'watchtower_api'@'%';
+GRANT EXECUTE ON FUNCTION WatchTower.* TO 'watchtower_api'@'%';
 
--- Permisos de solo lectura para funciones
-GRANT EXECUTE ON FUNCTION `BD_WatchTower`.`CalculateDiscoveryRating` TO 'astro_read'@'localhost';
-GRANT EXECUTE ON FUNCTION `BD_WatchTower`.`CountUserDiscoveries` TO 'astro_read'@'localhost';
-GRANT EXECUTE ON FUNCTION `BD_WatchTower`.`IsVisibleFromEarth` TO 'astro_read'@'localhost';
+-- Usuario solo lectura (por ejemplo para auditoría o analytics)
+GRANT SELECT ON WatchTower.* TO 'watchtower_readonly'@'%';
 
--- Aplicar los cambios
+-- Aplicar los cambios de permisos
 FLUSH PRIVILEGES;
