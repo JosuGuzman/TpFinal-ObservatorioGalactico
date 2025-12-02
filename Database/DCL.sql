@@ -1,3 +1,5 @@
+USE BD_WatchTower;
+
 /* ============================================================
    DCL – WATCHTOWER
    Data Control Language (Seguridad y permisos de BD)
