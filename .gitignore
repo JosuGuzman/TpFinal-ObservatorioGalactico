@@ -1,0 +1,62 @@
+# Desde la raíz del proyecto
+@"
+## Ignorar archivos de .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.csproj.user
+*.vs/
+.vscode/
+
+## Ignorar archivos de publicación
+publish/
+app.publish/
+
+## Ignorar archivos de configuración sensible
+appsettings.Development.json
+appsettings.Production.json
+*.env
+*.secret
+
+## Ignorar archivos de base de datos
+*.mdf
+*.ldf
+*.sdf
+
+## Ignorar archivos temporales
+tmp/
+temp/
+*.tmp
+*.temp
+
+## Ignorar logs
+*.log
+logs/
+
+## Ignorar archivos de usuario
+*.userprefs
+
+## Ignorar archivos de compilación
+*.cache
+*.ilk
+*.pdb
+
+## Ignorar archivos de VS
+.vs/
+
+## Ignorar paquetes NuGet
+packages/
+*.nupkg
+
+## Ignorar archivos de cobertura
+coverage.xml
+coverage.json
+*.coverage
+
+## Ignorar archivos de SQLite
+*.db
+*.sqlite
+"@ | Out-File -FilePath .gitignore -Encoding UTF8
