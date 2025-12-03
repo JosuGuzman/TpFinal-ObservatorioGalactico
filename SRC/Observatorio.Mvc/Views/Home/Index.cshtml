@@ -1,8 +1,186 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model Observatorio.Mvc.Models.HomeViewModel
+
+@{
+    ViewData["Title"] = "Observatorio Galáctico";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section -->
+<div class="hero-section text-center py-5 mb-5 rounded-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container py-5">
+        <h1 class="display-4 fw-bold text-white mb-3">
+            <i class="bi bi-stars"></i> Observatorio WatchTower
+        </h1>
+        <p class="lead text-white mb-4">
+            Explora el universo, descubre nuevas maravillas y comparte tu pasión por la astronomía
+        </p>
+        <div class="mt-4">
+            <a asp-controller="Galaxy" asp-action="Index" class="btn btn-light btn-lg me-3">
+                <i class="bi bi-universe"></i> Explorar Galaxias
+            </a>
+            <a asp-controller="Discovery" asp-action="Report" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-plus-circle"></i> Reportar Descubrimiento
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row mb-5">
+    <div class="col-md-3 col-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="text-primary">@Model.GalaxyCount</h2>
+                <p class="card-text">Galaxias Catalogadas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="text-warning">@Model.StarCount</h2>
+                <p class="card-text">Estrellas Registradas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="text-success">@Model.PlanetCount</h2>
+                <p class="card-text">Planetas Descubiertos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="text-info">@Model.DiscoveryCount</h2>
+                <p class="card-text">Descubrimientos Reportados</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Content -->
+<div class="row">
+    <!-- Featured Galaxies -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h4><i class="bi bi-galaxy"></i> Galaxias Destacadas</h4>
+            </div>
+            <div class="card-body">
+                @if (Model.FeaturedGalaxies.Any())
+                {
+                    foreach (var galaxy in Model.FeaturedGalaxies)
+                    {
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                <div class="bg-dark text-white rounded-circle p-3">
+                                    <i class="bi bi-stars fs-4"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="mb-1">
+                                    <a asp-controller="Galaxy" asp-action="Details" asp-route-id="@galaxy.GalaxyID" class="text-decoration-none">
+                                        @galaxy.Name
+                                    </a>
+                                </h5>
+                                <small class="text-muted">
+                                    @galaxy.Type • @galaxy.DistanceLy.ToString("N0") años luz
+                                </small>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">No hay galaxias destacadas.</p>
+                }
+                <div class="text-center mt-3">
+                    <a asp-controller="Galaxy" asp-action="Index" class="btn btn-outline-primary">Ver Todas las Galaxias</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Discoveries -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h4><i class="bi bi-compass"></i> Descubrimientos Recientes</h4>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentDiscoveries.Any())
+                {
+                    foreach (var discovery in Model.RecentDiscoveries)
+                    {
+                        <div class="mb-3 pb-3 border-bottom">
+                            <h6 class="mb-1">@discovery.SuggestedName</h6>
+                            <small class="text-muted d-block mb-1">
+                                <i class="bi bi-@(discovery.ObjectType.ToString().ToLower())"></i>
+                                @discovery.ObjectType • Reportado por @discovery.ReporterName
+                            </small>
+                            <div class="d-flex justify-content-between">
+                                <span class="badge bg-@(discovery.State.ToString() == "Aprobado" ? "success" : "warning")">
+                                    @discovery.State
+                                </span>
+                                <small>@discovery.CreatedAt.ToString("dd/MM/yyyy")</small>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">No hay descubrimientos recientes.</p>
+                }
+                <div class="text-center mt-3">
+                    <a asp-controller="Discovery" asp-action="Index" class="btn btn-outline-warning">Ver Todos los Descubrimientos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Events -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4><i class="bi bi-calendar-event"></i> Próximos Eventos Astronómicos</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @if (Model.UpcomingEvents.Any())
+                    {
+                        foreach (var evt in Model.UpcomingEvents)
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@evt.Name</h5>
+                                        <p class="card-text text-muted">
+                                            <i class="bi bi-calendar"></i> @evt.EventDate.ToString("dd/MM/yyyy HH:mm")
+                                        </p>
+                                        <p class="card-text">@(evt.Description.Length > 100 ? evt.Description.Substring(0, 100) + "..." : evt.Description)</p>
+                                        <a asp-controller="Event" asp-action="Details" asp-route-id="@evt.EventID" class="btn btn-outline-info btn-sm">
+                                            Más Información
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="col-12">
+                            <p class="text-muted">No hay eventos próximos programados.</p>
+                        </div>
+                    }
+                </div>
+                <div class="text-center mt-3">
+                    <a asp-controller="Event" asp-action="Index" class="btn btn-outline-info">Ver Todos los Eventos</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

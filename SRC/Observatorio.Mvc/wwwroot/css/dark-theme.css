@@ -1,0 +1,37 @@
+/* Dark Theme */
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --surface-color: #1e1e1e;
+    --text-color: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --border-color: #333333;
+}
+
+body.dark-theme {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+body.dark-theme .card {
+    background-color: var(--surface-color);
+    border-color: var(--border-color);
+}
+
+body.dark-theme .navbar {
+    background-color: var(--surface-color) !important;
+}
+
+body.dark-theme .table {
+    color: var(--text-color);
+}
+
+body.dark-theme .form-control {
+    background-color: var(--surface-color);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+body.dark-theme .form-control:focus {
+    background-color: var(--surface-color);
+    color: var(--text-color);
+}
