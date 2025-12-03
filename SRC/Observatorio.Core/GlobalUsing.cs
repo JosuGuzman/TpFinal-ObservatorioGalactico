@@ -1,0 +1,15 @@
+global using System;
+global using System.Linq;
+global using System.Collections.Generic;
+global using System.Threading.Tasks;
+global using Observatorio.Core.Entities.User;
+global using Observatorio.Core.Entities.Astronomic;
+global using Observatorio.Core.Entities.Content;
+global using System.Security.Cryptography;
+global using System.Text;
+global using System.Globalization;
+global using System.Text.RegularExpressions;
+global using System.Text.Json;
+global using Observatorio.Core.Enums;
+global using Observatorio.Core.Entities.System;
+global using System.ComponentModel.DataAnnotations;
