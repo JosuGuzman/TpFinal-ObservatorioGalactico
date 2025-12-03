@@ -178,4 +178,20 @@ public class UserService : IUserService
     {
         return await _userRepository.EmailExistsAsync(email);
     }
+
+    public async Task<IEnumerable<User>> GetAllUsersAsync()
+    {
+        return await _userRepository.GetAllAsync();
+    }
+
+    public async Task<int> GetTotalUsersCountAsync()
+    {
+        return await _userRepository.CountAsync();
+    }
+
+    public async Task<int> GetActiveUsersCountAsync()
+    {
+        var users = await _userRepository.GetAllAsync();
+        return users.Count(u => u.IsActive);
+    }
 }

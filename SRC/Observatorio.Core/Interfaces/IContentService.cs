@@ -6,10 +6,11 @@ public interface IContentService
                                     string tags = null, string featuredImage = null);
     Task<Article> GetArticleByIdAsync(int id);
     Task<Article> GetArticleBySlugAsync(string slug);
+    Task<IEnumerable<Event>> GetAllEventsAsync();
     Task<IEnumerable<Article>> GetPublishedArticlesAsync();
     Task<IEnumerable<Article>> GetArticlesByAuthorAsync(int authorId);
-    Task<Article> UpdateArticleAsync(int articleId, string title = null, string content = null, 
-                                    string state = null, string tags = null);
+    Task<Article> UpdateArticleAsync(int articleId, string? title = null, string? content = null, 
+                                    string? state = null, string? tags = null);
     Task DeleteArticleAsync(int articleId);
     Task PublishArticleAsync(int articleId);
     Task UnpublishArticleAsync(int articleId);

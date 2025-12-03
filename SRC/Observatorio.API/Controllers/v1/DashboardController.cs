@@ -1,5 +1,6 @@
 namespace Observatorio.API.Controllers.v1;
 
+
 [Route("api/v1/[controller]")]
 [ApiController]
 [Authorize]
@@ -258,15 +259,19 @@ public class DashboardController : BaseApiController
             .ToList();
     }
 
-    private async Task<object> GetUserActivityLast30Days()
+    private async Task<List<DateCountResponse>> GetUserActivityLast30Days()
     {
         var cutoffDate = DateTime.UtcNow.AddDays(-30);
         var activity = await _loggingService.GetActivitySinceAsync(cutoffDate);
         
         return activity
             .GroupBy(a => a.Timestamp.Date)
-            .Select(g => new { date = g.Key.ToString("yyyy-MM-dd"), count = g.Count() })
-            .OrderBy(g => g.date)
+            .Select(g => new DateCountResponse
+            { 
+                Date = g.Key.ToString("yyyy-MM-dd"), 
+                Count = g.Count() 
+            })
+            .OrderBy(g => g.Date)
             .ToList();
     }
 }

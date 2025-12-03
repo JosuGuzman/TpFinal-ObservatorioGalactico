@@ -240,4 +240,9 @@ public class ContentService : IContentService
         await _loggingService.LogInfoAsync("EventDeleted", 
             $"Event deleted: {eventObj.Name} (ID: {eventId})", eventObj.CreatedByUserID);
     }
+
+    public async Task<IEnumerable<Event>> GetAllEventsAsync()
+    {
+        return await _eventRepository.GetAllAsync();
+    }
 }

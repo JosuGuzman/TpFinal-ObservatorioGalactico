@@ -13,4 +13,7 @@ public interface IUserService
     Task GenerateApiKeyAsync(int userId);
     Task<bool> ValidateApiKeyAsync(string apiKey);
     Task<bool> UserExistsAsync(string email);
+    Task<IEnumerable<User>> GetAllUsersAsync();
+    Task<int> GetTotalUsersCountAsync();
+    Task<int> GetActiveUsersCountAsync();
 }

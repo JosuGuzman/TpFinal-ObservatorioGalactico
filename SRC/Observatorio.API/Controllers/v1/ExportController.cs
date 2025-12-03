@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Observatorio.Core.Interfaces;
-
 namespace Observatorio.API.Controllers.v1;
 
 [Route("api/v1/[controller]")]
