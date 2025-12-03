@@ -9,5 +9,5 @@ public enum SpectralType
     G,
     K,
     M,
-    Unknown
+    Desconocido
 }

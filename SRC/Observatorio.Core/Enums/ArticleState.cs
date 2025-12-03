@@ -2,7 +2,7 @@ namespace Observatorio.Core.Enums;
 
 public enum ArticleState
 {
-    Draft,
-    Published,
-    Archived
+    Borrador,
+    Publicado,
+    Archivado
 }

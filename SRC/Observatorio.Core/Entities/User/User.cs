@@ -20,6 +20,6 @@ public class User
     public string DisplayName => !string.IsNullOrEmpty(UserName) ? UserName : Email.Split('@')[0];
     public UserRole RoleEnum => (UserRole)RoleID;
     public bool IsAdmin => RoleEnum == UserRole.Admin;
-    public bool IsAstronomer => RoleEnum >= UserRole.Astronomer;
-    public bool IsResearcher => RoleEnum >= UserRole.Researcher;
+    public bool IsAstronomer => RoleEnum >= UserRole.Astronomo;
+    public bool IsResearcher => RoleEnum >= UserRole.Investigador;
 }

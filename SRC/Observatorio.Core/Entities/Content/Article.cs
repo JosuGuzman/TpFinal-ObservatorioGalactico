@@ -7,7 +7,7 @@ public class Article
     public string Slug { get; set; }
     public string Content { get; set; }
     public int AuthorUserID { get; set; }
-    public ArticleState State { get; set; } = ArticleState.Draft;
+    public ArticleState State { get; set; } = ArticleState.Borrador;
     public string Tags { get; set; } // JSON
     public string FeaturedImage { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -16,6 +16,6 @@ public class Article
     
     public virtual User.User Author { get; set; }
     
-    public bool IsPublished => State == ArticleState.Published && PublishedAt.HasValue;
-    public bool CanView => IsPublished || State == ArticleState.Draft;
+    public bool IsPublished => State == ArticleState.Publicado && PublishedAt.HasValue;
+    public bool CanView => IsPublished || State == ArticleState.Borrador;
 }

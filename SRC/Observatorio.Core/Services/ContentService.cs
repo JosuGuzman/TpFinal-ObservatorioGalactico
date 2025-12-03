@@ -30,7 +30,7 @@ public class ContentService : IContentService
                 AuthorUserID = authorId,
                 Tags = tags,
                 FeaturedImage = featuredImage,
-                State = ArticleState.Draft,
+                State = ArticleState.Borrador,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -122,7 +122,7 @@ public class ContentService : IContentService
     public async Task PublishArticleAsync(int articleId)
     {
         var article = await GetArticleByIdAsync(articleId);
-        article.State = ArticleState.Published;
+        article.State = ArticleState.Publicado;
         article.PublishedAt = DateTime.UtcNow;
         article.UpdatedAt = DateTime.UtcNow;
 
@@ -135,7 +135,7 @@ public class ContentService : IContentService
     public async Task UnpublishArticleAsync(int articleId)
     {
         var article = await GetArticleByIdAsync(articleId);
-        article.State = ArticleState.Draft;
+        article.State = ArticleState.Borrador;
         article.UpdatedAt = DateTime.UtcNow;
 
         await _articleRepository.UpdateAsync(article);
