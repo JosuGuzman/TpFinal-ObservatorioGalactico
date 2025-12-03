@@ -21,3 +21,5 @@ global using ValidationException = Observatorio.Core.Exceptions.ValidationExcept
 global using Microsoft.IdentityModel.Tokens;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Security.Claims;
+global using Microsoft.Extensions.DependencyInjection;
+global using Observatorio.Core.Services;
