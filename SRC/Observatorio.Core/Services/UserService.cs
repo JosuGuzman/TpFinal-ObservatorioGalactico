@@ -179,9 +179,13 @@ public class UserService : IUserService
         return await _userRepository.EmailExistsAsync(email);
     }
 
-    public async Task<IEnumerable<User>> GetAllUsersAsync()
+    public async Task<IEnumerable<User>> GetAllUsersAsync(int page = 1, int pageSize = 20)
     {
-        return await _userRepository.GetAllAsync();
+        var users = await _userRepository.GetAllAsync();
+        return users
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
     }
 
     public async Task<int> GetTotalUsersCountAsync()
