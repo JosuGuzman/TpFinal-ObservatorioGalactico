@@ -1,6 +1,5 @@
 namespace Observatorio.API.Controllers.v1;
 
-
 [Route("api/v1/[controller]")]
 [ApiController]
 [Authorize]
